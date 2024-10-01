@@ -1,0 +1,1 @@
+# OTUS-PostgreSQL-2024-09-NAKrasyukov

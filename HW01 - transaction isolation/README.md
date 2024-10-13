@@ -3,10 +3,11 @@
 **Создание виртуальной машины в VirtualBox**
   1) Скачиваю образ дистрибутива Linux с Официального сайта
   2) Создаю новую вм со стандартными настройками:
+     <img src="https://github.com/user-attachments/assets/5e1d6cd0-f5fb-49e8-b9b5-cd742df7c2ea" alt="drawing" width="200"/>
      ![image](https://github.com/user-attachments/assets/5e1d6cd0-f5fb-49e8-b9b5-cd742df7c2ea)
      ![image](https://github.com/user-attachments/assets/15b0e3c6-3b76-4924-93be-17608f1566a5)
      ![image](https://github.com/user-attachments/assets/c9523dd1-5490-4c54-a784-4e50908c7899)
-  3) Запускаю ВМ и устанавливаю ОС
+  4) Запускаю ВМ и устанавливаю ОС
      ![image](https://github.com/user-attachments/assets/4219c519-c9b7-4beb-898b-fc67e6145904)
 
 

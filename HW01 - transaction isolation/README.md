@@ -12,7 +12,7 @@
 
   3) Запускаю ВМ и устанавливаю ОС
 
-     <img src="[https://github.com/user-attachments/assets/c9523dd1-5490-4c54-a784-4e50908c7899](https://github.com/user-attachments/assets/4219c519-c9b7-4beb-898b-fc67e6145904)" alt="drawing" width="500"/>
+     <img src="https://github.com/user-attachments/assets/4219c519-c9b7-4beb-898b-fc67e6145904" alt="drawing" width="500"/>
 
 
 **Установка Postgres14**

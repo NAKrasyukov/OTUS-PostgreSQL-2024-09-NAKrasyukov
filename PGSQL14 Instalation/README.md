@@ -86,6 +86,7 @@
      Далее происходит установка Postgres14.
 
   6) Запуск сервиса postgersql:
+
         Создаю символическую ссылку на libpq.so.5
         
         ``sudo ln -s /opt/postgresql14/lib/libpq.so.5 /usr/lib64/libpq.so.5``

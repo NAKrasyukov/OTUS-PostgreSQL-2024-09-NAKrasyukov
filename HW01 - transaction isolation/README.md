@@ -82,4 +82,21 @@
 
      Также сдесь я отключил функцию проверки установки check(), тк из-за нее установка вылетала в ошибку на моменте проверки часового пояса. 
      Далее происходит установка Postgres14.
-     
+
+     6) Запуск сервиса postgersql:
+        Создаю символическую ссылку на libpq.so.5
+        
+        ``sudo ln -s /opt/postgresql14/lib/libpq.so.5 /usr/lib64/libpq.so.5``
+
+        Инициализирую базу данных с указанием каталога хранения
+
+        ``sudo -u postgres /opt/postgresql14/bin/initdb --locale=en_US.UTF-8 -D /var/lib/postgres/data14 ``
+
+        Запускаю сервис ``sudo systemctl start postgresql14.service``
+
+        Проверяю сервис ``sudo systemctl status postgresql14.service``
+        
+        <img src="https://github.com/user-attachments/assets/5c2af5de-2f74-4d92-8b73-e6ea240cc523" alt="drawing" width="500"/>
+
+        Все работает!
+

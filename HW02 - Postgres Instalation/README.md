@@ -42,6 +42,31 @@
 
     <img src="https://github.com/user-attachments/assets/842577da-b2d4-4f0a-a2a9-8eb79721ddc3" alt="drawing" width="500"/>
 
+11) Подключение к Postgres извне ВМ:
+    Для этого меняю конфигурацию pg_hba.conf, добавляю строку ``host all all 0.0.0.0/0 md5``. Тк в моем докер имадже нету никакого текстового редактора (vi, vim, nano и ed). Делаю это следующим образом:
+    Копирую файл из докера на ВМ ``sudo docker cp postgres_server:/var/lib/postgresql/data/pg_hba.conf ./pg_hba.conf``, меняю права доступа ``sudo chmod 777 /home/nakrasyukov/postgresql.conf``, добавляю необходимые параметры, восстанавливаю права доступа обратно ``sudo chmod 700 /home/nakrasyukov/postgresql.conf`` и копирую файл обратно в контейнер докера ``sudo docker ./pg_hba.conf cp postgres_server:/var/lib/postgresql/data/pg_hba.conf``.
+    Убеждаюсь что посгрес слушает все адреса ``sudo docker exec -it postgres_server cat /var/lib/postgresql/data/postgresql.conf | grep listen_addresses``
+
+    <img src="https://github.com/user-attachments/assets/70eb7ce8-a145-4870-9c88-46b019413f01" alt="drawing" width="500"/>
+
+    Для безопастности и для того чтобы не открывать порты и не настраивать фаерволл, в настройках ВМ выставляю сетевой адаптер "Сетевой мост" вместо "NAT", тем самым открывая доступ по портам только для локальной сети.
+    Перезапускаю ВМ и прописываю ``ip addr show`` чтобы узнать адрес виртуальной машины в локальной сети.
+
+    <img src="https://github.com/user-attachments/assets/1604ca67-4603-4adb-8a0f-a66bc24ed298" alt="drawing" width="500"/>
+
+    На своей хост машине на Windows создаю подключение в DBeaver с указанием этого ip адреса, портом 5432 и паролем от postgres который задавал при создании контейнера.
+
+    <img src="https://github.com/user-attachments/assets/6528aeb0-eb06-4c00-b070-e5fda6bd7009" alt="drawing" width="500"/>
+
+    Тесто соединения проходит. Можно сделать выборку из тестовой таблицы, которую создал ранее ``select * from test``:
+
+    <img src="https://github.com/user-attachments/assets/701f858b-6f1c-4efa-b8b5-c0dac56db410" alt="drawing" width="500"/>
+
     
+
+  
+    
+
+
 
 

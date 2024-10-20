@@ -44,14 +44,16 @@
      Параметр ``--editmenu`` позволяет отредактировать PKGBUILD перед началом установки.
      В функцию build() добавляю создание переменных, LLVM_CONFIG и CLANG
 
-    ``build() {
-    cd postgresql-${pkgver}
+     ```
+     build() {
+       
+     cd postgresql-${pkgver}
     
-    # Указал путь к clang и llvm
-    export LLVM_CONFIG=/usr/bin/llvm-config-15
-    export CLANG=/usr/bin/clang-15
+     #Указал путь к clang и llvm
+     export LLVM_CONFIG=/usr/bin/llvm-config-15
+     export CLANG=/usr/bin/clang-15
     
-    local options=(
+     local options=(
       --prefix=/opt/${pkgbase}
       --sysconfdir=/etc
       --with-gssapi
@@ -71,13 +73,13 @@
       --enable-nls
       --enable-thread-safety
       --disable-rpath
-    )
+     )
   
-    ./configure "${options[@]}"
-    make
-  }  
-    ``
+     ./configure "${options[@]}"
+     make
+     }
+     ```
 
-    Также сдесь я отключил функцию проверки установки check(), тк из-за нее установка вылетала в ошибку на моменте проверки сачового пояса. 
-
-  
+     Также сдесь я отключил функцию проверки установки check(), тк из-за нее установка вылетала в ошибку на моменте проверки сачового пояса. 
+     Далее происходит установка Postgres14.
+     

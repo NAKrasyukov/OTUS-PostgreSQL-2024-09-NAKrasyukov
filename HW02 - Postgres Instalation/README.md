@@ -48,7 +48,7 @@
     Копирую файл из докера на ВМ ``sudo docker cp postgres_server:/var/lib/postgresql/data/pg_hba.conf ./pg_hba.conf``, меняю права доступа ``sudo chmod 777 /home/nakrasyukov/postgresql.conf``, добавляю необходимые параметры, восстанавливаю права доступа обратно ``sudo chmod 700 /home/nakrasyukov/postgresql.conf`` и копирую файл обратно в контейнер докера ``sudo docker ./pg_hba.conf cp postgres_server:/var/lib/postgresql/data/pg_hba.conf``.
     Убеждаюсь что посгрес слушает все адреса ``sudo docker exec -it postgres_server cat /var/lib/postgresql/data/postgresql.conf | grep listen_addresses``
 
-    <img src="https://github.com/user-attachments/assets/70eb7ce8-a145-4870-9c88-46b019413f01" alt="drawing" width="500"/>
+    <img src="https://github.com/user-attachments/assets/70eb7ce8-a145-4870-9c88-46b019413f01" alt="drawing" width="800"/>
 
     Для безопастности и для того чтобы не открывать порты и не настраивать фаерволл, в настройках ВМ выставляю сетевой адаптер "Сетевой мост" вместо "NAT", тем самым открывая доступ по портам только для локальной сети.
     Перезапускаю ВМ и прописываю ``ip addr show`` чтобы узнать адрес виртуальной машины в локальной сети.
@@ -63,10 +63,10 @@
 
     <img src="https://github.com/user-attachments/assets/701f858b-6f1c-4efa-b8b5-c0dac56db410" alt="drawing" width="500"/>
 
-    12) Удаляю контейнер с сервером ``sudo docker stop postgres_server`` ``sudo docker rm postgres_server``
-    13) Создаю контейнер с сервером заново ``sudo docker run -d --name postgres_server -e POSTGRES_PASSWORD=yourpassword -v /var/lib/postgres_new:/var/lib/postgresql/data -p 5432:5432 postgres``
-    14) Поднимаю контейнер с клиентом ``sudo docker run -it --rm --name postgres_client --link postgres_server:postgres postgres psql -h postgres -U postgres`` и проверяю данные в тестововй таблице ``select * from test``
+12) Удаляю контейнер с сервером ``sudo docker stop postgres_server`` ``sudo docker rm postgres_server``
+13) Создаю контейнер с сервером заново ``sudo docker run -d --name postgres_server -e POSTGRES_PASSWORD=yourpassword -v /var/lib/postgres_new:/var/lib/postgresql/data -p 5432:5432 postgres``
+14) Поднимаю контейнер с клиентом ``sudo docker run -it --rm --name postgres_client --link postgres_server:postgres postgres psql -h postgres -U postgres`` и проверяю данные в тестововй таблице ``select * from test``
 
-    <img src="https://github.com/user-attachments/assets/f8985bfc-bb3e-414e-a929-bd383f7b07b7" alt="drawing" width="500"/>
+<img src="https://github.com/user-attachments/assets/f8985bfc-bb3e-414e-a929-bd383f7b07b7" alt="drawing" width="500"/>
 
-    **Все работает! И на этом домашнее задание выполнено!**
+**Все работает! И на этом домашнее задание выполнено!**

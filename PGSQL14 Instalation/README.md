@@ -95,7 +95,7 @@
 
         ``sudo -u postgres /opt/postgresql14/bin/initdb --locale=en_US.UTF-8 -D /var/lib/postgres/data14 ``
 
-        Запускаю сервис ``sudo systemctl start postgresql14.service``
+        Запускаю сервис ``sudo systemctl start postgresql14.service`` ``sudo systemctl enable postgresql14.service``
 
         Проверяю сервис ``sudo systemctl status postgresql14.service``
         

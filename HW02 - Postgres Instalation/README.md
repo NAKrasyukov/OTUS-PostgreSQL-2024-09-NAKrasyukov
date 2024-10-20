@@ -24,4 +24,24 @@
 
    <img src="https://github.com/user-attachments/assets/fa432667-3c86-4acf-9a0d-9cd0852c5ce6" alt="drawing" width="500"/>
 
+5) Создаю каталог ``sudo mkdir /var/lib/postgresql``
+6) Создаю новый каталог для хранения данных ``sudo mkdir /var/lib/postgres_new``
+7) Создаю контейнер с сервером postgers ``sudo docker run -d --name postgres_server -e POSTGRES_PASSWORD=yourpassword -v /var/lib/postgres_new:/var/lib/postgresql/data -p 5432:5432 postgres``
+8) Проверяю создание контейнера ``sudo docker ps``
+
+   <img src="https://github.com/user-attachments/assets/eaa5900c-03ba-4e41-b20f-c5dd6d9b61e0" alt="drawing" width="500"/>
+
+9) Создаю и подключаюсь к контейнеру с клиентом postgres ``sudo docker run -it --rm --name postgres_client --link postgres_server:postgres postgres psql -h postgres -U postgres``
+10) Создаю тестовую таблицу и заполняю данными:
+    
+    ``CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT);``
+
+    ``INSERT INTO test (name) VALUES ('Vasiliy'), ('Anton'), ('Egor');``
+
+    ``SELECT * FROM test;``
+
+    <img src="https://github.com/user-attachments/assets/842577da-b2d4-4f0a-a2a9-8eb79721ddc3" alt="drawing" width="500"/>
+
+    
+
 

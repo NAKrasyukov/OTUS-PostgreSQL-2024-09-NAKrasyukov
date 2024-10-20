@@ -17,6 +17,7 @@
 
 
 ## Установка Postgres14
-**Для установки на Arch Linux, Postgres версии 14 (не последняя версия), необходимо использовать AUR. Для этого:**
+**Для установки на Arch Linux, Postgres версии 14, необходимо использовать AUR. Для этого:**
   
-  1) 
+  1) Устанавливаем python setup tools
+     ``sudo pacman -S python-setuptools   ``

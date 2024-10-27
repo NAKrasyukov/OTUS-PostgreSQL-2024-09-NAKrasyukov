@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/f4bdd020-5e19-4cf2-abff-423e5623f1c1)# Домашнее задание - Физический уровень PostgreSQL (Установка и настройка PostgreSQL)
+# Домашнее задание - Физический уровень PostgreSQL (Установка и настройка PostgreSQL)
 
 ## Создание виртуальной машины в VirtualBox
 

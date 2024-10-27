@@ -62,10 +62,37 @@
 ## Перемещение данных Postgres
 
   1) Делаю postgres владельцем каталога: ``sudo chown -R postgres:postgres /mnt/data``
-  2) 
+  2) Перемещаю данные PostgreSQL: ``sudo mv /var/lib/postgres /mnt/data``
+  3) Пытаюсь запустить сервис PostgreSQL: ``sudo systemctl start postgresql``
+  4) Запустит сервис не удалось. Все потому что в конфигурации сервиса все еще указан старый каталог ``PGROOT``
+  5) Меняю в ``/usr/lib/systemd/system/postgresql.service`` каталоги для ``PGROOT`` и ``PIDFile``
 
+     <img src="https://github.com/user-attachments/assets/8a0fcb14-fa63-48de-a4a0-685cd24dd209" alt="drawing" width="500"/>
 
+  6) Перезагружаю сессию и пробую запустить сервис: ``sudo systemctl start postgresql``. Теперь сервис запускается.
+  7) Запускаю ``sudo -u postgres psql`` и делаю выборку из тестовой таблицы ``select * from test;``:
 
+     <img src="https://github.com/user-attachments/assets/d7ea9dc6-09d5-4ab1-afc2-27c61a226bec" alt="drawing" width="500"/>
 
+  Данные отображаются корректно!
 
-    
+## Задание со звездочкой *
+
+  1) Создаю новую виртуалную машину аналогично первой
+  2) Устанавливаю Postgres на ВМ: ``sudo pacman -S postgresql``
+  3) Инициализирую кластер базы данных в стандартном каталоге: ``sudo -u postgres initdb --locale=en_US.UTF-8 -D /var/lib/postgres/data``
+  4) Удаляю каталог с данными: ``sudo rm -rf /var/lib/postgres``
+  5) Выключаю ВМ
+  6) Подключаю ранее созданный жесткий диск к этой ВМ (Настройки ВМ -> Носители -> Контроллер SATA -> Добавить жесткий диск, выбираю ранее созданный жесткий диск):
+
+     <img src="https://github.com/user-attachments/assets/4906a88b-2790-4e82-bd4c-ec66a87de562" alt="drawing" width="500"/>
+
+  7) Запускаю ВМ, создаю точку монтирования ``sudo mkdir -p /mnt/data`` и монтирую в нее диск ``sudo mount /dev/sdb1 /mnt/data``, для автоматического монтирования добавляю запись в fstab: ``echo '/dev/sdb1 /mnt/data ext4 defaults 0 2' | sudo tee -a /etc/fstab``
+  8) Делаю postgres владельцем каталога: ``sudo chown -R postgres:postgres /mnt/data``
+  9) Меняю в ``/usr/lib/systemd/system/postgresql.service`` каталоги для ``PGROOT`` и ``PIDFile``
+  10) Перезагружаю ВМ и пытаюсь запустить сервис ``sudo systemctl start postgresql``
+  11) Запускаю ``sudo -u postgres psql`` и делаю выборку из тестовой таблицы ``select * from test;``:
+
+      <img src="https://github.com/user-attachments/assets/706f6f4c-e14c-45ad-8111-3269d89a32fd" alt="drawing" width="500"/>
+
+**Готово! И на этом домашнее задание выполнено!**

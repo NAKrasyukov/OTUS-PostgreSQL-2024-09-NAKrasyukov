@@ -2,7 +2,7 @@
 
 ## Подготовка тестовой среды
 
-  1) С сайта https://neon.tech/postgresql/postgresql-getting-started/postgresql-sample-database тестовую открытую базу "dvdrental"
+  1) С сайта https://neon.tech/postgresql/postgresql-getting-started/postgresql-sample-database скачиваю тестовую открытую базу "dvdrental"
   2) Распаковал архив с базой
   3) Поднял базу на своем инстансе Postgres ``pg_restore -U postgres -d postgres -1 /home/nakrasyukov/Загрузки/dvdrental.tar``
   4) Выбрал таблицу "film" в качестве подопытного, удалил с этой таблицы все имеющиеся индексы, убедился что на таблице не осталогсь индексов ``SELECT indexname AS index_name, tablename AS table_name FROM pg_indexes WHERE tablename = 'film';``

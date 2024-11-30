@@ -30,11 +30,11 @@
   **Реализовать индекс для полнотекстового поиска**
 
   1) Создание индекса для полнотекстового поиска по полю description в таблице film - ``CREATE INDEX indx_film_description ON film USING gin(to_tsvector('english', description));``
-  2) Проверяю работу поиска по индексу ``SELECT * FROM film WHERE to_tsvector('english', description) @@ to_tsquery('epic & drama');``
+  2) Проверяю работу поиска по индексу - ``SELECT * FROM film WHERE to_tsvector('english', description) @@ to_tsquery('epic & drama');``
 
      <img src="https://github.com/user-attachments/assets/d4ff1476-5345-44c8-a55e-2b5892babbb7" alt="drawing" width="500"/>
 
-  3) Результат команды ````:
+  3) Результат команды ``EXPLAIN SELECT * FROM film WHERE to_tsvector('english', description) @@ to_tsquery('epic & drama');``:
 
      ```
      QUERY PLAN                                                                                              |
@@ -44,3 +44,44 @@
        ->  Bitmap Index Scan on "indx_film_description"  (cost=0.00..13.21 rows=1 width=0)                   |
              Index Cond: (to_tsvector('english'::regconfig, description) @@ to_tsquery('epic & drama'::text))|
      ```
+     
+  **Реализовать индекс на часть таблицы или индекс на поле с функцией**
+
+  1) Создание индекса на поле length только для строк с рейтингом PG - ``CREATE INDEX indx_film_length_pg ON film (length) WHERE rating = 'PG';``
+  2) Результат команды ``EXPLAIN SELECT * FROM film WHERE rating = 'PG' AND length > 100;``:
+
+     ```
+     QUERY PLAN                                                 |
+     -----------------------------------------------------------+
+     Seq Scan on film  (cost=0.00..103.00 rows=118 width=384)   |
+       Filter: ((length > 100) AND (rating = 'PG'::mpaa_rating))|
+     ```
+
+  **Создать индекс на несколько полей**
+
+  1) Создание составного индекса на поля rental_duration и rental_rate - ``CREATE INDEX indx_film_rentdur_rentrate ON film(rental_duration, rental_rate);``
+  2) Результат команды ``EXPLAIN SELECT * FROM film WHERE rental_duration > 3 AND rental_rate < 4.99;``
+
+     ```
+     QUERY PLAN                                                |
+     ----------------------------------------------------------+
+     Seq Scan on film  (cost=0.00..103.00 rows=529 width=384)  |
+       Filter: ((rental_duration > 3) AND (rental_rate < 4.99))|
+     ```
+
+  **Написать комментарии к каждому из индексов**
+
+  1) Создание комментариев к каждому индексу:
+
+     ```
+     COMMENT ON INDEX indx_film_id IS 'Индекс для поиска фильмов по ID';
+     COMMENT ON INDEX indx_film_description IS 'Индекс для полнотекстового поиска по описанию фильмов';
+     COMMENT ON INDEX indx_film_length_pg IS 'Индекс для фильмов с рейтингом PG';
+     COMMENT ON INDEX indx_film_rentdur_rentrate IS 'Составной индекс для срока аренды и арендной платы';
+     ```
+
+  3) Проверяю что комментарии отображаются при наведении курсора:
+
+     <img src="https://github.com/user-attachments/assets/a6548969-3c8f-4501-a8b8-7c9c7c85cc98" alt="drawing" width="500"/>
+
+**Готово! И на этом домашнее задание выполнено!**

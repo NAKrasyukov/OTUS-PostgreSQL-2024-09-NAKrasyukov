@@ -68,6 +68,7 @@
 А на ВМ4 в файе postgresql.conf установить параметры ``hot_standby = on``
 ``primary_conninfo = 'host=192.168.1.40 port=5432 user=пользователь_для_реплики password=пароль'``
 ``primary_slot_name = 'vm4_replica_slot'``
+
 И восстановить постгрес на ВМ4 с ВМ3: ``pg_basebackup -h 192.168.1.40 -D /mnt/data/postgresql/14/data/ -U репликация_пользователь -Fp -Xs -P -R``
 
 **Готово! И на этом домашнее задание выполнено!**

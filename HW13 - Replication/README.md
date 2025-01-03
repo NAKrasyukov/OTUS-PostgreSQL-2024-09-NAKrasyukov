@@ -14,6 +14,7 @@
      У ВМ2: 192.168.1.55;
      И у ВМ3: 192.168.1.40
   7) Проверяю что машины видят другдруга при помощи утилиты ``ping``
+
      ВМ1:
      
      <img src="https://github.com/user-attachments/assets/97449af4-3e57-4107-82db-f306c09dcb97" alt="drawing" width="500"/>

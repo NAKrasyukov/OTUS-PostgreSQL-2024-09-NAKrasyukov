@@ -15,13 +15,16 @@
      И у ВМ3: 192.168.1.40
   7) Проверяю что машины видят другдруга при помощи утилиты ``ping``
      ВМ1:
+     
      <img src="https://github.com/user-attachments/assets/97449af4-3e57-4107-82db-f306c09dcb97" alt="drawing" width="500"/>
      ВМ2:
+     
      <img src="https://github.com/user-attachments/assets/bc6e2921-84cf-419c-9cfa-453c735c547c" alt="drawing" width="500"/>
      ВМ3:
+     
      <img src="https://github.com/user-attachments/assets/8907c358-dbad-477a-95e9-8fc19f0907f5" alt="drawing" width="500"/>
 
-  8) Убеждаюсь что на каждой ВМ в настройках постгреса установлены следующие параметры ``wal_level = logical``, ``max_wal_senders = 10``, ``max_replication_slots = 10``
+  9) Убеждаюсь что на каждой ВМ в настройках постгреса установлены следующие параметры ``wal_level = logical``, ``max_wal_senders = 10``, ``max_replication_slots = 10``
 
      <img src="https://github.com/user-attachments/assets/e118fecb-3e49-41ad-918b-952c4d83916a" alt="drawing" width="500"/>
 

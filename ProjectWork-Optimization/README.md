@@ -4,12 +4,12 @@
 
 Современные базы данных играют ключевую роль в обработке и анализе больших объемов информации. Одной из наиболее популярных систем управления базами данных (СУБД) является PostgreSQL, известная своей расширяемостью, мощными возможностями индексирования и поддержкой сложных аналитических запросов. Однако производительность PostgreSQL по умолчанию не всегда является оптимальной и требует дополнительной настройки в зависимости от характеристик сервера и специфики нагрузки.
 
-В данной работе рассматривается процесс оптимизации кластера PostgreSQL и запросов к нему на примере обработки данных из набора "Animes Dataset 2023" с платформы Kaggle. Оптимизация включает в себя настройку параметров PostgreSQL, создание индексов, анализ и улучшение запросов, а также другие мероприятия, направленные на повышение производительности системы.
+В данной работе рассматривается процесс оптимизации кластера PostgreSQL и запросов к нему на примере обработки данных из набора "Animes Dataset 2023" с платформы Kaggle. Данный дата-сет представляет собой выгрузку открытых данных с сайта myanimelist.net. Оптимизация включает в себя настройку параметров PostgreSQL, создание индексов, анализ и улучшение запросов, а также другие мероприятия, направленные на повышение производительности системы.
 
 **Исходные данные загружаются в базу данных из трех CSV-файлов:**
-- `anime-transformed-dataset-2023.csv`
-- `users-details-transformed-2023.csv`
-- `users-scores-transformed-2023.csv`
+- `anime-transformed-dataset-2023.csv` - 23748 записей. Представляет список всех анмие и информацию по ним. 
+- `users-details-transformed-2023.csv` - 731282 записей. Представляет список всех пользователей и открытую информацию по ним.
+- `users-scores-transformed-2023.csv`  - 23796586 записей. Является сводным списком, в котором предоставлена информация о том какой пользователь какому аниме какую оценку поставил.  
 
 Анализ эффективности оптимизации проводится с использованием инструмента `EXPLAIN ANALYZE`, позволяющего оценить планы выполнения запросов и время их обработки. Основная цель работы — на практике продемонстрировать, как изменения в настройках кластера и структуры запросов влияют на производительность базы данных.
 
@@ -26,6 +26,7 @@
 8. Провести повторное тестирование и сравнить результаты до и после оптимизации.
 
 Результаты работы позволят наглядно продемонстрировать влияние различных мер оптимизации на скорость выполнения запросов, а также получить практический опыт настройки и улучшения производительности PostgreSQL.
+
 
 
 ## Шаг 1 - Подготовка виртуальной машины и кластера постгрес.
@@ -50,3 +51,112 @@
 
      <img src="https://github.com/user-attachments/assets/4fb9418a-c40f-471f-8b06-e2ca6452e5f2" alt="drawing" width="500"/>
 
+## Шаг 2 - Импорт данных в PostgreSQL
+
+  Данный дата-сет изначально создавался для обучения нейронных сетей, а потому структура данных не совсем подходит для работы с ними в БД, а также дата-сет содержит лишнюю (в рамках данной работы) информацию, такую как ссылки на изображения с обложками, подробное описание каждого сериала и др.
+  По этой причине необходимо произвести нормализацию и очистку данных. Я решил сделать это на этапе импорта данных, чтобы не возвращаться к этому в дальнейшем. 
+  **Перечень полей для импорта по каждому файлу: **
+
+  - Файл: ``anime-transformed-dataset-2023.csv``; Столбцы: ``id,title,genres,type,episodes,status,producers,licensors,studios,source,duration,rating,rank,popularity,favorites,scored_by,members,is_hentai``.
+  - Файл: ``users-details-transformed-2023.csv``; Столбцы: ``id,name,gender,joined,days_watched,mean_score,watching,completed,on_hold,dropped,plan_to_watch,total_entries,rewatched,episodes_watched``.
+  - Файл: ``users-scores-transformed-2023.csv``;  Столбцы: ``user_id,anime_id,rating``.
+
+  Перед началом импорта данных необходимо создать в БД подходящую структуру:
+
+  1) Создание новой базы данных: ``CREATE DATABASE anime_db;``
+  2) Создание таблицы ``anime``:
+```
+     CREATE TABLE anime (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    genres TEXT,
+    type TEXT,
+    episodes INT,
+    status TEXT,
+    producers TEXT,
+    licensors TEXT,
+    studios TEXT,
+    source TEXT,
+    duration TEXT,
+    rating TEXT,
+    rank INT,
+    popularity INT,
+    favorites INT,
+    scored_by INT,
+    members INT,
+    is_hentai BOOLEAN
+    );
+```
+  3) Создание таблицы ``users``:
+```
+     CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    gender TEXT,
+    joined TIMESTAMP WITH TIME ZONE,
+    days_watched NUMERIC,
+    mean_score NUMERIC(4,2),
+    watching INT,
+    completed INT,
+    on_hold INT,
+    dropped INT,
+    plan_to_watch INT,
+    total_entries INT,
+    rewatched INT,
+    episodes_watched INT
+    );
+```
+  4) Создание таблицы ``user_scores``:
+```
+    CREATE TABLE user_scores (
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    anime_id INT REFERENCES anime(id) ON DELETE CASCADE,
+    rating SMALLINT CHECK (rating BETWEEN 0 AND 10),
+    PRIMARY KEY (user_id, anime_id)
+    );
+```
+
+  Теперь, когда в БД подготовлена структура данных можно приступать к импорту данных. Так как из файлов нужно импортировать не все, а только определенные столбцы, а стандартная утилита ``COPY`` это не поддерживает, то мною было принято решение сначала загрузить все данные во временную таблицу, а потом перелить только нужные данные в основную (чуть позже выяснилось, что это не лучшее решение). 
+
+  **Скрипт для импорта данных из файла ``anime-transformed-dataset-2023.csv``:**
+```
+    CREATE TEMP TABLE anime_raw (
+    col1 TEXT, col2 TEXT, col3 TEXT, col4 TEXT, col5 TEXT, col6 TEXT, col7 TEXT, col8 TEXT, col9 TEXT, col10 TEXT, 
+    col11 TEXT, col12 TEXT, col13 TEXT, col14 TEXT, col15 TEXT, col16 TEXT, col17 TEXT, col18 TEXT, col19 TEXT, col20 TEXT, col21 TEXT
+    );
+    
+    COPY anime_raw FROM '/mnt/data/anime-transformed-dataset-2023.csv'
+    DELIMITER ',' CSV HEADER QUOTE '"' ESCAPE '"';
+    
+    INSERT INTO anime (id, title, genres, type, episodes, status, producers, licensors, studios, source, duration, rating, rank, popularity, favorites, scored_by, members, is_hentai)
+    SELECT col1::INT, col2, col4, col6::INT, col7, col8, col9, col10, col11, col12, col13, col14, col15::INT, col16::INT, col17::INT, col18::INT, col19::INT,col21::BOOLEAN
+    FROM anime_raw;
+```
+
+  Данные из файла ``users-details-transformed-2023.csv`` не нуждаются в очистке и нормализации, поэтому их можно импортировать полностью.
+  
+  **Скрипт для импорта данных из файла ``users-details-transformed-2023.csv``:**
+```
+    COPY users(id, name, gender, joined, days_watched, mean_score, watching, completed, on_hold, dropped, plan_to_watch, total_entries, rewatched, episodes_watched)
+    FROM '/mnt/data/users-details-transformed-2023.csv'
+    DELIMITER ','
+    CSV HEADER QUOTE '"' ESCAPE '"';
+```
+
+  Изначально я попробовал импортировать данные из файла ``users-scores-transformed-2023.csv`` таким же образом, как и для первого файла, однако, так как временные таблицы в PostgreSQL храняться в оперативной памяти, а данный файл содержит больше всего информации, я столкнулся с переполнением оперативной памяти на виртуальной машине. Поэтому, вместо создания временной таблицы, будет создана обычная таблица для импорта всех данных из файла, а потом только необходимые данные будут загружены в основную таблицу. 
+  
+  **Скрипт для импорта данных из файла ``users-scores-transformed-2023.csv``:**
+```
+    CREATE TABLE usr_scr_tmp (
+    col1 TEXT, col2 TEXT, col3 TEXT, col4 TEXT, col5 TEXT
+    );
+
+    COPY usr_scr_tmp FROM '/mnt/data/users-scores-transformed-2023.csv'
+    DELIMITER ',' CSV HEADER QUOTE '"' ESCAPE '"';
+
+    INSERT INTO user_scores (user_id, anime_id, rating)
+    SELECT col1::INT, col3::INT, col5::SMALLINT
+    FROM anime_raw;
+
+    DROP TABLE usr_scr_tmp;
+```

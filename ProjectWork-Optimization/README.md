@@ -195,7 +195,7 @@
     FROM user_scores us
     JOIN users u ON us.user_id = u.id
     JOIN anime a ON us.anime_id = a.id
-    WHERE (u.id = 3611 OR u.name = 'Пример_Пользователя')
+    WHERE (u.id = 3611)
     AND us.rating > 0
     ORDER BY us.rating DESC, a.popularity DESC
     LIMIT 10;
@@ -207,4 +207,89 @@
   <img src="https://github.com/user-attachments/assets/8a4fcf2a-865c-4cca-8a5e-35c9f074837e" alt="drawing" width="500"/>
 
   Обновленный, оптимизированный запрос уже имеет Planning Time: 0.320 ms (в 6 раз быстрее), а также Execution Time: 46.154 ms (в 2,5 раза быстрее). На данном примере было выявлено, что правильное написание запроса позволяет повысить его производительность более чем в 2 раза. 
+
+  **Также рассмотрим пример где случайным образом изменяются оценки случайных пользователей в таблице user_scores:**
+```
+    UPDATE user_scores
+    SET rating = FLOOR(RANDOM() * 11)  -- случайная оценка, число от 0 до 10
+    WHERE (user_id, anime_id) IN (
+        SELECT user_id, anime_id
+        FROM user_scores
+        TABLESAMPLE SYSTEM (5)  -- случайный выбор ~5% строк без полной сортировки
+        LIMIT 50000  -- ограничиваем количество обновлений
+    );
+```
+
+  **Результат выполнения скрипта обновления данных:**
+
+  <img src="https://github.com/user-attachments/assets/db245640-15ac-4550-af42-2b741960496f" alt="drawing" width="500"/>
+
+  Данный запрос имеет Execution Time: 712.384 ms
+  
+## Шаг 4 - Настройка PostgreSQL.
+
+  Для подбора оптимальных настроек для PostgreSQL использован сервис pgtune.leopard.in.ua. После указания характеристик виртуальной машины, сервис порекомендовал следующие настройки для кластера PostgreSQL:
+```
+    # DB Version: 17
+    # OS Type: linux
+    # DB Type: web
+    # Total Memory (RAM): 8 GB
+    # CPUs num: 3
+    # Data Storage: ssd
+    
+    max_connections = 200
+    shared_buffers = 2GB
+    effective_cache_size = 6GB
+    maintenance_work_mem = 512MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 5242kB
+    huge_pages = off
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+```
+
+  Внес изменения в файл конфигурации постгрес и перезагрузил кластер. 
+
+## Шаг 5 - Работа с индексами.
+
+  Для начала следует рассмотреть самую крупную таблицу ``user_scores``.
+  **Скрипт для проверки наличия индексов:**
+```
+    -- Проверяем, есть ли индекс на user_scores(user_id)
+    SELECT * FROM pg_indexes WHERE tablename = 'user_scores' AND indexname LIKE '%user_id%';
+    
+    -- Проверяем, есть ли индекс на user_scores(anime_id)
+    SELECT * FROM pg_indexes WHERE tablename = 'user_scores' AND indexname LIKE '%anime_id%';
+```
+
+  **Результат работы скрипта:**
+
+  <img src="https://github.com/user-attachments/assets/542dbcae-8d2e-4981-8717-d1a31a4c5941" alt="drawing" width="500"/>
+
+  Как видно, на таблице ``user_scores`` отсутствуют индексы. Индексы на столбцах ``user_id`` и ``anime_id`` помогут быстрее находить строки в ``user_scores`` при соединении с ``users`` и ``anime``.
+
+  **Создание индексов:**
+```
+    CREATE INDEX idx_user_scores_user_id ON user_scores (user_id);
+    CREATE INDEX idx_user_scores_anime_id ON user_scores (anime_id);
+```
+
+  **Так же, для данного конкретного запроса следует создать составной индекс:**
+  ``CREATE INDEX idx_user_scores_user_id_rating ON user_scores (user_id, rating DESC);``
+
+  Данынй индекс ускорит фильтрацию (``WHERE user_id = 3611``), а так же скорит сортировку (``ORDER BY rating DESC``).
+
+  **Проверка результата выполнения EXPLAIN ANALYZE:**
+
+  <img src="https://github.com/user-attachments/assets/26c5ba08-1765-4c7e-98aa-f64a3a51ff6f" alt="drawing" width="500"/>
+
+  На данном этапе видно, что Planning Time практически не изменилось и составляет 0.309 ms (было 0.320 ms), однако Execution Time сократился аж до 0.154 ms (почти в 300 раз быстрее прежнего). 
+
+
+  **Так же проверим производительность скрипта обновления данных:**
+
   

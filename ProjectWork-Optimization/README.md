@@ -195,7 +195,7 @@
     FROM user_scores us
     JOIN users u ON us.user_id = u.id
     JOIN anime a ON us.anime_id = a.id
-    WHERE (u.id = 123 OR u.name = 'Пример_Пользователя')
+    WHERE (u.id = 3611 OR u.name = 'Пример_Пользователя')
     AND us.rating > 0
     ORDER BY us.rating DESC, a.popularity DESC
     LIMIT 10;

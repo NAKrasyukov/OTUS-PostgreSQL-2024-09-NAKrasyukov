@@ -280,6 +280,7 @@
 ```
 
   **Так же, для данного конкретного запроса я попробовал создать составной индекс:**
+  
   ``CREATE INDEX idx_user_scores_user_id_rating ON user_scores (user_id, rating DESC);``
 
   Данынй индекс ускорит фильтрацию (``WHERE user_id = 3611``), а так же скорит сортировку (``ORDER BY rating DESC``).

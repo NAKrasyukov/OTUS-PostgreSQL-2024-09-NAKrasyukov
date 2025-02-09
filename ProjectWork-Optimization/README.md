@@ -55,7 +55,8 @@
 
   Данный дата-сет изначально создавался для обучения нейронных сетей, а потому структура данных не совсем подходит для работы с ними в БД, а также дата-сет содержит лишнюю (в рамках данной работы) информацию, такую как ссылки на изображения с обложками, подробное описание каждого сериала и др.
   По этой причине необходимо произвести нормализацию и очистку данных. Я решил сделать это на этапе импорта данных, чтобы не возвращаться к этому в дальнейшем. 
-  **Перечень полей для импорта по каждому файлу: **
+  
+  **Перечень полей для импорта по каждому файлу:**
 
   - Файл: ``anime-transformed-dataset-2023.csv``; Столбцы: ``id,title,genres,type,episodes,status,producers,licensors,studios,source,duration,rating,rank,popularity,favorites,scored_by,members,is_hentai``.
   - Файл: ``users-details-transformed-2023.csv``; Столбцы: ``id,name,gender,joined,days_watched,mean_score,watching,completed,on_hold,dropped,plan_to_watch,total_entries,rewatched,episodes_watched``.
